@@ -1,11 +1,14 @@
-;;;; ispidina.asd
+#|
+  This file is a part of ispidina project.
+|#
 
-(asdf:defsystem #:ispidina
-  :description "rakin'"
+(defsystem "ispidina"
+  :version "0.1.0"
   :author "Ezwal"
-  :license  "IDGF"
-  :version "0.0.1"
-  :serial t
+  :license "IDGF"
   :depends-on (#:dexador #:plump #:lquery #:lparallel #:str)
-  :components ((:file "package")
-               (:file "ispidina")))
+  :components ((:module "src"
+                :components
+                ((:file "ispidina"))))
+  :description "rakin'"
+  :in-order-to ((test-op (test-op "ispidina-test"))))

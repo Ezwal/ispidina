@@ -24,15 +24,33 @@
 (defun format-id-to-link (id)
   (str:concat "https://i.imgur.com/" id ".jpg"))
 
+(defun fetch-img (url destination)
+  (ignore-errors (dex:fetch url destination)))
+
 (defun fetch-imgur-gallery (url)
   (let* ((parsed-page (dl+parse-page url))
          (title (select-imgur-title parsed-page))
          (title-dir (directory-name title))
          (images (select-imgur-images parsed-page)))
     (ensure-directories-exist title-dir)
-    (loop :for id :across images
-          :collect (fetch-img (format-id-to-link id)
-                              (str:concat title-dir id ".jpg")))))
+    (map 'vector
+          (lambda (id) (fetch-img (format-id-to-link id)
+                                        (str:concat title-dir id ".jpg")))
+            images)))
 
-(defun fetch-img (url destination)
-  (ignore-errors (dex:fetch url destination)))
+;; this may or not be useful depending on the state of the network
+;; (setf lparallel:*kernel* (lparallel:make-kernel 4))
+;; (defun parallel-fetch-imgur-gallery (url)
+;;   (let* ((parsed-page (dl+parse-page url))
+;;          (title (select-imgur-title parsed-page))
+;;          (title-dir (directory-name title))
+;;          (images (select-imgur-images parsed-page)))
+;;     (ensure-directories-exist title-dir)
+;;     (lparallel:pmap 'vector
+;;                     (lambda (id) (fetch-img (format-id-to-link id)
+;;                                             (str:concat title-dir id ".jpg")))
+;;                     images)))
+
+(defun main ()
+  (let ((argv sb-ext:*posix-argv*))
+    (fetch-imgur-gallery (first argv))))

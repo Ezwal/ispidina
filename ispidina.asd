@@ -4,8 +4,9 @@
   :description "rakin'"
   :author "Ezwal"
   :license  "IDGF"
-  :version "0.0.1"
+  :version "0.0.2"
   :serial t
   :depends-on (#:dexador #:plump #:lquery #:lparallel #:str)
   :components ((:file "package")
-               (:file "ispidina")))
+               (:file "ispidina"))
+  :entry-point "ispidina:main")

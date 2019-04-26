@@ -2,6 +2,9 @@
 
 (in-package #:ispidina)
 
+(defvar *imgur-link* "https://imgur.com/gallery/ljYIWap")
+(defvar *artstation-link* "https://www.artstation.com/ivanvilmant/likes")
+
 (defun dl+parse-page (url)
   (let ((page (dex:get url)))
     (plump:parse page)))
@@ -12,17 +15,32 @@
                              (text))
                            :test #'equal) 0))
 
+(defmacro select-title (lquery-sel parsed-page)
+  `(aref (remove-duplicates (lquery:$ ,parsed-page
+                              ,@lquery-sel)
+                            :test #'equal) 0))
 
 (defun select-imgur-images (parsed-page)
-    (delete-duplicates (lquery:$ parsed-page
-                         "div .post-image-container"
-                         (attr :id))))
+  (delete-duplicates (lquery:$ parsed-page
+                       "div .post-image-container"
+                       (attr :id))))
+
+(defmacro select-images (lquery-sel parsed-page)
+  `(delete-duplicates (lquery:$ ,parsed-page
+                        ,@lquery-sel)))
+
+(defun select-imgur-images (parsed-page)
+  (select-images ("div .post-image-container" (attr :id))
+                 parsed-page))
 
 (defun directory-name (s)
   (str:concat (str:replace-all  " " "_" s) "/"))
 
 (defun format-id-to-link (id)
   (str:concat "https://i.imgur.com/" id ".jpg"))
+
+(defun get-formatter (form) (lambda (id)
+                              (str:replace-all "{id}" id form)))
 
 (defun fetch-imgur-gallery (url)
   (let* ((parsed-page (dl+parse-page url))
@@ -36,3 +54,6 @@
 
 (defun fetch-img (url destination)
   (ignore-errors (dex:fetch url destination)))
+
+;; (defmacro defraker (name &key (get "div") (dl ""))
+;;   `())

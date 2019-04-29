@@ -42,18 +42,21 @@
 (defun get-formatter (form) (lambda (id)
                               (str:replace-all "{id}" id form)))
 
+(defun fetch-img (url destination)
+  (ignore-errors (dex:fetch url destination)))
+
 (defun fetch-imgur-gallery (url)
   (let* ((parsed-page (dl+parse-page url))
          (title (select-imgur-title parsed-page))
          (title-dir (directory-name title))
          (images (select-imgur-images parsed-page)))
     (ensure-directories-exist title-dir)
-    (loop :for id :across images
-          :collect (fetch-img (format-id-to-link id)
-                              (str:concat title-dir id ".jpg")))))
+    (map 'vector
+         (lambda (id) (fetch-img (format-id-to-link id)
+                                 (str:concat title-dir id ".jpg")))
+         images)))
 
-(defun fetch-img (url destination)
-  (ignore-errors (dex:fetch url destination)))
 
-;; (defmacro defraker (name &key (get "div") (dl ""))
-;;   `())
+(defun main ()
+  (let ((argv sb-ext:*posix-argv*))
+    (fetch-imgur-gallery (first argv))))

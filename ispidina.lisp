@@ -33,10 +33,10 @@
   (select-images ("div .post-image-container" (attr :id))
                  parsed-page))
 
-(defmacro replace-multiple (to-replace s)
-  `(apply #'str:replace-all (,@(first to-replace)
-            (if (not ,to-replace) ,s
-                (replace-multiple ,(rest to-replace) ,s)))))
+(defun replace-multiple (to-replace s)
+  (if (not to-replace) s
+      (apply #'str:replace-all (append (first to-replace)
+                (list (replace-multiple (rest to-replace) s))))))
 
 (defun directory-name (s)
   (str:concat (str:replace-all "/" "|" (str:replace-all  " " "_" s)) "/"))
